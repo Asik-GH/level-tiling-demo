@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F6F4EF">
+<title>LEVEL Tiling — Quick Quote (Demo)</title>
+<style>
+  :root {
+    --bg: #F6F4EF;
+    --surface: #FFFFFF;
+    --ink: #1C1B19;
+    --muted: #6B675F;
+    --line: #E4E0D8;
+    --accent: #1C1B19;
+    --accent-ink: #FFFFFF;
+    --selected: #F0EDE6;
+    --wa: #128C4A;
+    --wa-hover: #0F7A40;
+    --demo: #8A5A00;
+    --demo-bg: #FFF4DC;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(28,27,25,.04), 0 8px 24px rgba(28,27,25,.06);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font: inherit; color: inherit; }
+
+  .demo-bar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--demo-bg); color: var(--demo);
+    text-align: center; font-size: 14px; font-weight: 600; letter-spacing: .02em;
+    padding: 8px 16px; border-bottom: 1px solid #F1DFB4;
+  }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
+
+  header { padding: 28px 0 20px; text-align: center; }
+  .brand { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .brand-name { font-size: 30px; font-weight: 800; letter-spacing: .28em; padding-left: .28em; }
+  .brand-sub { font-size: 12px; font-weight: 600; letter-spacing: .5em; padding-left: .5em; color: var(--muted); }
+  .brand-rule { width: 40px; height: 2px; background: var(--ink); margin: 10px auto 0; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 24px 20px 20px;
+  }
+
+  .progress { margin-bottom: 22px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .progress-track { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--ink); border-radius: 99px; transition: width .3s ease; }
+
+  h1, h2 { margin: 0 0 6px; line-height: 1.25; }
+  h1 { font-size: 28px; }
+  h2 { font-size: 24px; }
+  .hint { margin: 0 0 20px; color: var(--muted); font-size: 16px; }
+
+  .options { display: grid; gap: 12px; }
+  .option {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; min-height: 64px; padding: 14px 18px;
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px;
+    text-align: left; font-size: 19px; font-weight: 600; cursor: pointer;
+    transition: border-color .15s, background .15s, transform .05s;
+  }
+  .option small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .option:hover { border-color: #BDB7AB; }
+  .option:active { transform: scale(.99); }
+  .option[aria-pressed="true"] { border-color: var(--ink); background: var(--selected); }
+  .option .tick {
+    flex: none; width: 24px; height: 24px; border-radius: 50%;
+    border: 1.5px solid var(--line); display: grid; place-items: center;
+  }
+  .option[aria-pressed="true"] .tick { background: var(--ink); border-color: var(--ink); }
+  .option[aria-pressed="true"] .tick::after {
+    content: ""; width: 10px; height: 6px; margin-top: -2px;
+    border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg);
+  }
+  .options.two { grid-template-columns: 1fr 1fr; }
+  .options.two .option { justify-content: center; text-align: center; min-height: 72px; }
+  .options.two .option .tick { display: none; }
+
+  .area-value { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin: 8px 0 18px; }
+  .area-value input {
+    width: 140px; text-align: center; font-size: 44px; font-weight: 800;
+    border: 1.5px solid var(--line); border-radius: 14px; padding: 6px 8px; background: var(--surface);
+  }
+  .area-value input:focus { outline: none; border-color: var(--ink); }
+  .area-value span { font-size: 24px; font-weight: 700; color: var(--muted); }
+  input[type="range"] { width: 100%; height: 44px; accent-color: var(--ink); cursor: pointer; }
+  .range-labels { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-top: -6px; }
+  .area-tip { margin: 16px 0 0; font-size: 15px; color: var(--muted); text-align: center; }
+
+  .nav { display: flex; gap: 12px; margin-top: 24px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 60px; padding: 0 22px; border-radius: 14px; border: 1.5px solid transparent;
+    font-size: 18px; font-weight: 700; text-decoration: none; cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); flex: 1; }
+  .btn-primary:hover { background: #33312D; }
+  .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn-ghost:hover { border-color: #BDB7AB; }
+  .btn-block { width: 100%; }
+
+  .intro-points { list-style: none; padding: 0; margin: 4px 0 24px; display: grid; gap: 10px; }
+  .intro-points li { display: flex; gap: 12px; align-items: flex-start; color: var(--muted); font-size: 17px; }
+  .intro-points b { color: var(--ink); }
+  .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin-top: 10px; }
+
+  .result-label { font-size: 15px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  .result-range { font-size: 40px; font-weight: 800; line-height: 1.15; margin: 6px 0 4px; }
+  .result-note { margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+  .summary { border-top: 1px solid var(--line); margin: 0 0 24px; padding: 0; }
+  .summary div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+  .summary dt { color: var(--muted); }
+  .summary dd { margin: 0; font-weight: 600; text-align: right; }
+  .cta-lead { font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+  .btn-wa { background: var(--wa); color: #fff; width: 100%; min-height: 68px; font-size: 19px; }
+  .btn-wa:hover { background: var(--wa-hover); }
+  .btn-wa svg { width: 26px; height: 26px; flex: none; }
+  .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .restart { margin-top: 20px; text-align: center; }
+  .link-btn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 16px; cursor: pointer; padding: 8px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 28px; }
+
+  .screen { animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .screen { animation: none; }
+    .progress-fill { transition: none; }
+  }
+  :focus-visible { outline: 3px solid #7FA7FF; outline-offset: 2px; }
+  [tabindex="-1"]:focus { outline: none; }
+  [hidden] { display: none !important; }
+
+  @media (min-width: 600px) {
+    .card { padding: 32px 32px 28px; }
+    h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">Demo — sample prices</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand" aria-label="LEVEL Tiling">
+      <span class="brand-name">LEVEL</span>
+      <span class="brand-sub">TILING</span>
+      <span class="brand-rule"></span>
+    </div>
+  </header>
+
+  <main class="card" id="app" aria-live="polite"></main>
+
+  <footer>Tiling &amp; bathrooms · Estimates are a guide, not a final quote</footer>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// SAMPLE pricing rules — replace with LEVEL's real price sheet.
+// All money values are in EUR. Per-m² values are multiplied by the area.
+// ---------------------------------------------------------------------------
+const PRICING = {
+  currency: 'EUR',
+  locale: 'en-IE',
+  // Base labour price per m², by type of job
+  jobTypes: {
+    bathroom:   { label: 'Full bathroom',      perM2: 95, defaultArea: 15 },
+    floor:      { label: 'Floor',              perM2: 45, defaultArea: 10 },
+    walls:      { label: 'Walls',              perM2: 50, defaultArea: 12 },
+    splashback: { label: 'Kitchen splashback', perM2: 65, defaultArea: 3 },
+    other:      { label: 'Other',              perM2: 55, defaultArea: 8 },
+  },
+  // Multiplier on the base price, by tile size
+  tileSizes: {
+    small:  { label: 'Small',        detail: 'Under 30 cm',  factor: 1.15 },
+    medium: { label: 'Medium',       detail: '30–60 cm',     factor: 1.00 },
+    large:  { label: 'Large format', detail: '60 cm and up', factor: 1.25 },
+  },
+  removalPerM2: 15,      // removing old tiles, per m²
+  tileSupplyPerM2: 30,   // allowance when LEVEL supplies the tiles, per m²
+  // Surcharge as a fraction of the total (0.20 = +20%)
+  timing: {
+    urgent:   { label: 'Urgent',          detail: 'Next 1–2 weeks', surcharge: 0.20 },
+    month:    { label: 'Within a month',  detail: '',               surcharge: 0 },
+    flexible: { label: 'Flexible',        detail: 'Whenever suits', surcharge: 0 },
+  },
+  minimumJob: 300,       // smallest job LEVEL takes on
+  rangeSpread: 0.15,     // show the estimate as ±15%
+  roundTo: 10,           // round the range to the nearest €10
+};
+
+// Placeholder contact details — replace with LEVEL's real ones.
+const CONTACT = {
+  whatsapp: '353000000000',   // digits only, with country code (wa.me format)
+  phone: '+353000000000',
+  email: 'hello@example.com',
+};
+
+const AREA = { min: 1, max: 60, step: 0.5, inputMax: 500 };
+
+const STEPS = ['job', 'area', 'tile', 'removal', 'supplied', 'timing'];
+
+const state = {
+  screen: 'intro', // 'intro' | step key | 'result'
+  answers: { job: null, area: null, tile: null, removal: null, supplied: null, timing: null },
+  areaTouched: false,
+};
+let advancing = false;
+
+const app = document.getElementById('app');
+const money = new Intl.NumberFormat(PRICING.locale, {
+  style: 'currency', currency: PRICING.currency, maximumFractionDigits: 0,
+});
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function formatArea(n) {
+  return (Math.round(n * 10) / 10).toString().replace(/\.0$/, '');
+}
+
+// --- Calculation ------------------------------------------------------------
+
+function estimate(a) {
+  const job = PRICING.jobTypes[a.job];
+  const tile = PRICING.tileSizes[a.tile];
+  const timing = PRICING.timing[a.timing];
+
+  let total = a.area * job.perM2 * tile.factor;
+  if (a.removal === 'yes') total += a.area * PRICING.removalPerM2;
+  if (a.supplied === 'no') total += a.area * PRICING.tileSupplyPerM2;
+  total *= 1 + timing.surcharge;
+  total = Math.max(total, PRICING.minimumJob);
+
+  const round = v => Math.round(v / PRICING.roundTo) * PRICING.roundTo;
+  return {
+    low: round(total * (1 - PRICING.rangeSpread)),
+    high: round(total * (1 + PRICING.rangeSpread)),
+  };
+}
+
+function summaryRows(a) {
+  return [
+    ['Job', PRICING.jobTypes[a.job].label],
+    ['Area', formatArea(a.area) + ' m²'],
+    ['Tile size', PRICING.tileSizes[a.tile].label + ' (' + PRICING.tileSizes[a.tile].detail + ')'],
+    ['Remove old tiles', a.removal === 'yes' ? 'Yes' : 'No'],
+    ['Tiles supplied by me', a.supplied === 'yes' ? 'Yes' : 'No'],
+    ['Timing', PRICING.timing[a.timing].label],
+  ];
+}
+
+function quoteMessage(a, est) {
+  const lines = summaryRows(a).map(([k, v]) => '• ' + k + ': ' + v);
+  return [
+    'Hi LEVEL Tiling, I used the quick quote on your website.',
+    '',
+    ...lines,
+    '',
+    'Estimate: ' + money.format(est.low) + ' – ' + money.format(est.high),
+    '',
+    'Could you give me a more accurate quote?',
+  ].join('\n');
+}
+
+// --- Rendering --------------------------------------------------------------
+
+function progressHTML(stepIndex) {
+  const n = stepIndex + 1;
+  const pct = Math.round((n / STEPS.length) * 100);
+  return `
+    <div class="progress" aria-label="Step ${n} of ${STEPS.length}">
+      <div class="progress-meta"><span>Step ${n} of ${STEPS.length}</span><span>${pct}%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+}
+
+function optionsHTML(key, items, cols) {
+  const current = state.answers[key];
+  return `<div class="options${cols === 2 ? ' two' : ''}" role="group">` + items.map(([value, label, detail]) => `
+      <button type="button" class="option" data-key="${key}" data-value="${value}" aria-pressed="${current === value}">
+        <span>${esc(label)}${detail ? `<small>${esc(detail)}</small>` : ''}</span>
+        <span class="tick" aria-hidden="true"></span>
+      </button>`).join('') + `</div>`;
+}
+
+function navHTML(showNext) {
+  return `
+    <div class="nav">
+      <button type="button" class="btn btn-ghost" data-action="back" aria-label="Back">← Back</button>
+      ${showNext ? `<button type="button" class="btn btn-primary" data-action="next">Next</button>` : ''}
+    </div>`;
+}
+
+const SCREENS = {
+  intro() {
+    return `
+      <h1>Get a quick quote</h1>
+      <p class="hint">Six simple questions. About one minute.</p>
+      <ul class="intro-points">
+        <li><span class="dot"></span><span><b>Instant price range</b> based on our standard rates</span></li>
+        <li><span class="dot"></span><span><b>No sign-up</b> and no obligation</span></li>
+        <li><span class="dot"></span><span><b>Send it to us on WhatsApp</b> for an exact quote</span></li>
+      </ul>
+      <button type="button" class="btn btn-primary btn-block" data-action="start">Start my quote</button>`;
+  },
+
+  job() {
+    const items = Object.entries(PRICING.jobTypes).map(([k, v]) => [k, v.label]);
+    return progressHTML(0) + `
+      <h2>What kind of job is it?</h2>
+      <p class="hint">Choose the closest match.</p>
+      ${optionsHTML('job', items)}
+      ${navHTML(false)}`;
+  },
+
+  area() {
+    const v = state.answers.area;
+    return progressHTML(1) + `
+      <h2>Roughly how big is the area?</h2>
+      <p class="hint">An estimate is fine — we'll measure properly later.</p>
+      <div class="area-value">
+        <input id="areaInput" type="number" inputmode="decimal" min="${AREA.step}" max="${AREA.inputMax}" step="${AREA.step}"
+               value="${formatArea(v)}" aria-label="Area in square metres">
+        <span>m²</span>
+      </div>
+      <input id="areaRange" type="range" min="${AREA.min}" max="${AREA.max}" step="${AREA.step}"
+             value="${Math.min(Math.max(v, AREA.min), AREA.max)}" aria-label="Area slider">
+      <div class="range-labels"><span>${AREA.min} m²</span><span>${AREA.max}+ m²</span></div>
+      <p class="area-tip">Tip: a typical bathroom floor is 4–6 m².</p>
+      ${navHTML(true)}`;
+  },
+
+  tile() {
+    const items = Object.entries(PRICING.tileSizes).map(([k, v]) => [k, v.label, v.detail]);
+    return progressHTML(2) + `
+      <h2>What size are the tiles?</h2>
+      <p class="hint">Not sure yet? Pick medium.</p>
+      ${optionsHTML('tile', items)}
+      ${navHTML(false)}`;
+  },
+
+  removal() {
+    return progressHTML(3) + `
+      <h2>Do old tiles need removing first?</h2>
+      <p class="hint">Includes taking off old tiles and preparing the surface.</p>
+      ${optionsHTML('removal', [['yes', 'Yes'], ['no', 'No']], 2)}
+      ${navHTML(false)}`;
+  },
+
+  supplied() {
+    return progressHTML(4) + `
+      <h2>Will you supply the tiles?</h2>
+      <p class="hint">If not, we can source them for you.</p>
+      ${optionsHTML('supplied', [['yes', 'Yes, I have them'], ['no', 'No, please supply']], 2)}
+      ${navHTML(false)}`;
+  },
+
+  timing() {
+    const items = Object.entries(PRICING.timing).map(([k, v]) => [k, v.label, v.detail]);
+    return progressHTML(5) + `
+      <h2>When do you need it done?</h2>
+      <p class="hint">Flexible dates help us fit you in.</p>
+      ${optionsHTML('timing', items)}
+      ${navHTML(false)}`;
+  },
+
+  result() {
+    const a = state.answers;
+    const est = estimate(a);
+    const msg = quoteMessage(a, est);
+    const wa = 'https://wa.me/' + CONTACT.whatsapp + '?text=' + encodeURIComponent(msg);
+    const mail = 'mailto:' + CONTACT.email + '?subject=' + encodeURIComponent('Quote request') + '&body=' + encodeURIComponent(msg);
+    const rows = summaryRows(a).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+    return `
+      <p class="result-label">Your estimate</p>
+      <p class="result-range">${money.format(est.low)} – ${money.format(est.high)}</p>
+      <p class="result-note">A guide based on your answers. The final price is confirmed after a quick look at the job.</p>
+      <dl class="summary">${rows}</dl>
+      <p class="cta-lead">Want a more accurate quote?</p>
+      <a class="btn btn-wa" href="${wa}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+        Message LEVEL on WhatsApp
+      </a>
+      <div class="contact-row">
+        <a class="btn btn-ghost" href="tel:${CONTACT.phone}">Call</a>
+        <a class="btn btn-ghost" href="${mail}">Email</a>
+      </div>
+      <div class="restart"><button type="button" class="link-btn" data-action="restart">Start a new quote</button></div>`;
+  },
+};
+
+function render() {
+  app.innerHTML = `<div class="screen">${SCREENS[state.screen]()}</div>`;
+  if (state.screen === 'area') bindArea();
+  const heading = app.querySelector('h1, h2, .result-range');
+  if (heading && state.screen !== 'intro') {
+    heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function go(screen) {
+  state.screen = screen;
+  render();
+}
+
+function next() {
+  const i = STEPS.indexOf(state.screen);
+  go(i === STEPS.length - 1 ? 'result' : STEPS[i + 1]);
+}
+
+function back() {
+  const i = STEPS.indexOf(state.screen);
+  go(i <= 0 ? 'intro' : STEPS[i - 1]);
+}
+
+function bindArea() {
+  const input = document.getElementById('areaInput');
+  const range = document.getElementById('areaRange');
+  const nextBtn = app.querySelector('[data-action="next"]');
+
+  const validate = () => {
+    const v = parseFloat(input.value);
+    const ok = Number.isFinite(v) && v > 0 && v <= AREA.inputMax;
+    nextBtn.disabled = !ok;
+    if (ok) state.answers.area = v;
+  };
+
+  range.addEventListener('input', () => {
+    input.value = formatArea(parseFloat(range.value));
+    state.areaTouched = true;
+    validate();
+  });
+  input.addEventListener('input', () => {
+    const v = parseFloat(input.value);
+    if (Number.isFinite(v)) range.value = Math.min(Math.max(v, AREA.min), AREA.max);
+    state.areaTouched = true;
+    validate();
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !nextBtn.disabled) next();
+  });
+  validate();
+}
+
+app.addEventListener('click', e => {
+  const opt = e.target.closest('.option');
+  if (opt) {
+    const { key, value } = opt.dataset;
+    state.answers[key] = value;
+    if (key === 'job' && !state.areaTouched) {
+      state.answers.area = PRICING.jobTypes[value].defaultArea;
+    }
+    app.querySelectorAll(`.option[data-key="${key}"]`).forEach(b => b.setAttribute('aria-pressed', b === opt));
+    // Guard against a quick double tap skipping the next question.
+    if (!advancing) {
+      advancing = true;
+      setTimeout(() => { advancing = false; next(); }, 180);
+    }
+    return;
+  }
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  switch (btn.dataset.action) {
+    case 'start': go(STEPS[0]); break;
+    case 'next': next(); break;
+    case 'back': back(); break;
+    case 'restart':
+      state.answers = { job: null, area: null, tile: null, removal: null, supplied: null, timing: null };
+      state.areaTouched = false;
+      go('intro');
+      break;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
